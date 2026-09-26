@@ -1,0 +1,325 @@
+<?xml version="1.0"?>
+
+<robot name="carro" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- ================================================ -->
+    <!-- PARÂMETROS GERAIS DO CARRO                       -->
+    <!-- ================================================ -->
+
+    <!-- Chassi -->
+    <xacro:property name="chassis_length" value="0.35"/>
+    <xacro:property name="chassis_width"  value="0.24"/>
+    <xacro:property name="chassis_height" value="0.08"/>
+    <xacro:property name="chassis_mass"   value="2.0"/>
+
+    <!-- Rodas -->
+    <xacro:property name="wheel_radius" value="0.05"/>
+    <xacro:property name="wheel_width"  value="0.04"/>
+    <xacro:property name="wheel_mass"   value="0.10"/>
+
+    <!-- Geometria do veículo -->
+    <xacro:property name="wheel_base" value="0.24"/>
+    <xacro:property name="track_width" value="0.30"/>
+
+    <!-- Limites mecânicos -->
+    <xacro:property name="max_wheel_speed" value="20.0"/>
+    <xacro:property name="max_wheel_effort" value="10.0"/>
+
+
+    <!-- ================================================ -->
+    <!-- CHASSI                                           -->
+    <!-- ================================================ -->
+
+    <link name="base_link">
+
+        <visual>
+            <geometry>
+                <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+            </geometry>
+
+            <material name="blue">
+                <color rgba="0.1 0.3 0.8 1.0"/>
+            </material>
+        </visual>
+
+        <collision>
+            <geometry>
+                <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+            </geometry>
+        </collision>
+
+        <inertial>
+            <mass value="${chassis_mass}"/>
+
+            <inertia
+                ixx="${chassis_mass * (chassis_width*chassis_width + chassis_height*chassis_height) / 12.0}"
+                ixy="0.0"
+                ixz="0.0"
+                iyy="${chassis_mass * (chassis_length*chassis_length + chassis_height*chassis_height) / 12.0}"
+                iyz="0.0"
+                izz="${chassis_mass * (chassis_length*chassis_length + chassis_width*chassis_width) / 12.0}"/>
+        </inertial>
+
+    </link>
+
+
+    <!-- ================================================ -->
+    <!-- MACRO PARA CRIAR UMA RODA                        -->
+    <!-- ================================================ -->
+
+    <xacro:macro name="wheel" params="name x y">
+
+        <link name="${name}_link">
+
+            <visual>
+                <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+
+                <geometry>
+                    <cylinder
+                        radius="${wheel_radius}"
+                        length="${wheel_width}"/>
+                </geometry>
+
+                <material name="black">
+                    <color rgba="0.05 0.05 0.05 1.0"/>
+                </material>
+            </visual>
+
+            <collision>
+                <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+
+                <geometry>
+                    <cylinder
+                        radius="${wheel_radius}"
+                        length="${wheel_width}"/>
+                </geometry>
+            </collision>
+
+            <inertial>
+                <mass value="${wheel_mass}"/>
+
+                <inertia
+                    ixx="${wheel_mass * (3*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}"
+                    ixy="0"
+                    ixz="0"
+                    iyy="${wheel_mass * wheel_radius*wheel_radius/2.0}"
+                    iyz="0"
+                    izz="${wheel_mass * (3*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}"/>
+            </inertial>
+
+        </link>
+
+
+        <joint name="${name}_joint" type="continuous">
+
+            <parent link="base_link"/>
+            <child link="${name}_link"/>
+
+            <origin
+                xyz="${x} ${y} ${-chassis_height/2}"
+                rpy="0 0 0"/>
+
+            <axis xyz="0 1 0"/>
+
+            <limit
+                effort="${max_wheel_effort}"
+                velocity="${max_wheel_speed}"/>
+
+            <dynamics
+                damping="0.02"
+                friction="0.0"/>
+
+        </joint>
+
+    </xacro:macro>
+
+
+    <!-- ================================================ -->
+    <!-- QUATRO RODAS                                     -->
+    <!-- ================================================ -->
+
+    <xacro:wheel
+        name="front_left_wheel"
+        x="${wheel_base/2}"
+        y="${track_width/2}"/>
+
+    <xacro:wheel
+        name="rear_left_wheel"
+        x="${-wheel_base/2}"
+        y="${track_width/2}"/>
+
+    <xacro:wheel
+        name="front_right_wheel"
+        x="${wheel_base/2}"
+        y="${-track_width/2}"/>
+
+    <xacro:wheel
+        name="rear_right_wheel"
+        x="${-wheel_base/2}"
+        y="${-track_width/2}"/>
+<!-- ================================================ -->
+<!-- LIDAR                                            -->
+<!-- ================================================ -->
+
+<link name="lidar_link">
+
+    <visual>
+        <geometry>
+            <cylinder
+                radius="0.035"
+                length="0.025"/>
+        </geometry>
+
+        <material name="lidar_black">
+            <color rgba="0.1 0.1 0.1 1.0"/>
+        </material>
+    </visual>
+
+
+<joint name="lidar_joint" type="fixed">
+
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+
+    <!-- x y z roll pitch yaw -->
+    <origin
+        xyz="0.12 0 0.08"
+        rpy="0 0 0"/>
+
+</joint>
+
+    <!-- ================================================ -->
+    <!-- ROS 2 CONTROL                                    -->
+    <!-- ================================================ -->
+
+    <ros2_control name="GazeboSimSystem" type="system">
+
+        <hardware>
+            <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+        </hardware>
+
+
+        <joint name="front_left_wheel_joint">
+
+            <command_interface name="velocity"/>
+
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+
+        </joint>
+
+
+        <joint name="rear_left_wheel_joint">
+
+            <command_interface name="velocity"/>
+
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+
+        </joint>
+
+
+        <joint name="front_right_wheel_joint">
+
+            <command_interface name="velocity"/>
+
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+
+        </joint>
+
+
+        <joint name="rear_right_wheel_joint">
+
+            <command_interface name="velocity"/>
+
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+
+        </joint>
+
+    </ros2_control>
+
+
+    <!-- ================================================ -->
+    <!-- GAZEBO + ROS2 CONTROL                            -->
+    <!-- ================================================ -->
+
+    <gazebo>
+
+        <plugin
+            filename="libgz_ros2_control-system.so"
+            name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+
+            <parameters>
+                $(find carro_sim)/config/controllers.yaml
+            </parameters>
+
+        </plugin>
+
+    </gazebo>
+
+
+<gazebo reference="lidar_link">
+
+    <sensor
+        name="lidar_sensor"
+        type="gpu_lidar">
+        <gz_frame_id>lidar_link</gz_frame_id>  
+        <topic>scan</topic>
+
+        <update_rate>10</update_rate>
+
+        <always_on>true</always_on>
+
+        <visualize>true</visualize>
+
+
+        <ray>
+
+            <scan>
+
+                <horizontal>
+
+                    <samples>360</samples>
+
+                    <resolution>1</resolution>
+
+                    <min_angle>-3.14159</min_angle>
+
+                    <max_angle>3.14159</max_angle>
+
+                </horizontal>
+
+                <vertical>
+
+                    <samples>1</samples>
+
+                    <resolution>1</resolution>
+
+                    <min_angle>0</min_angle>
+
+                    <max_angle>0</max_angle>
+
+                </vertical>
+
+            </scan>
+
+
+            <range>
+
+                <min>0.08</min>
+
+                <max>8.0</max>
+
+                <resolution>0.01</resolution>
+
+            </range>
+
+        </ray>
+
+    </sensor>
+
+</gazebo>
+
+</robot>

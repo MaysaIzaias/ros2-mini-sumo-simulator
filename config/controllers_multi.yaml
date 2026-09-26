@@ -1,0 +1,25 @@
+/**/controller_manager:
+  ros__parameters:
+
+    # Frequência do ros2_control.
+    update_rate: 100
+
+    # Publica posição e velocidade das juntas.
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    # Envia torque diretamente para as duas rodas.
+    wheel_effort_controller:
+      type: effort_controllers/JointGroupEffortController
+
+
+/**/wheel_effort_controller:
+  ros__parameters:
+
+    # Ordem IMPORTANTE:
+    #
+    # commands.data[0] -> roda esquerda
+    # commands.data[1] -> roda direita
+    joints:
+      - left_wheel_joint
+      - right_wheel_joint

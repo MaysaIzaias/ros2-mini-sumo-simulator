@@ -1,0 +1,294 @@
+<?xml version="1.0"?>
+
+<sdf version="1.10">
+
+    <world name="pista">
+
+        <physics name="1ms" type="ignored">
+
+            <max_step_size>0.001</max_step_size>
+
+            <real_time_factor>1.0</real_time_factor>
+
+        </physics>
+
+
+        <plugin
+            filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics"/>
+
+        <plugin
+            filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands"/>
+
+        <plugin
+            filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster"/>
+	
+	<plugin
+    filename="gz-sim-sensors-system"
+    name="gz::sim::systems::Sensors">
+
+    <render_engine>ogre2</render_engine>
+
+</plugin>
+
+        <light type="directional" name="sun">
+
+            <pose>0 0 10 0 0 0</pose>
+
+            <cast_shadows>true</cast_shadows>
+
+            <direction>-0.5 0.1 -0.9</direction>
+
+        </light>
+
+
+        <model name="ground">
+
+            <static>true</static>
+
+            <link name="ground_link">
+
+                <collision name="collision">
+
+                    <geometry>
+
+                        <plane>
+
+                            <normal>0 0 1</normal>
+
+                            <size>20 20</size>
+
+                        </plane>
+
+                    </geometry>
+
+                </collision>
+
+
+                <visual name="visual">
+
+                    <geometry>
+
+                        <plane>
+
+                            <normal>0 0 1</normal>
+
+                            <size>20 20</size>
+
+                        </plane>
+
+                    </geometry>
+
+                    <material>
+
+                        <ambient>0.7 0.7 0.7 1</ambient>
+
+                        <diffuse>0.7 0.7 0.7 1</diffuse>
+
+                    </material>
+
+                </visual>
+
+            </link>
+
+        </model>
+
+<!-- ================================================= -->
+<!-- OBSTÁCULO 1 - PAREDE FRONTAL                      -->
+<!-- ================================================= -->
+
+<model name="parede_frontal">
+
+    <static>true</static>
+
+    <!-- x y z roll pitch yaw -->
+    <pose>2.0 0 0.40 0 0 0</pose>
+
+    <link name="link">
+
+        <collision name="collision">
+            <geometry>
+                <box>
+                    <size>0.20 2.00 0.80</size>
+                </box>
+            </geometry>
+        </collision>
+
+        <visual name="visual">
+            <geometry>
+                <box>
+                    <size>0.20 2.00 0.80</size>
+                </box>
+            </geometry>
+
+            <material>
+                <ambient>0.8 0.1 0.1 1</ambient>
+                <diffuse>0.8 0.1 0.1 1</diffuse>
+            </material>
+        </visual>
+
+    </link>
+
+</model>
+
+
+<!-- ================================================= -->
+<!-- OBSTÁCULO 2 - CAIXA À ESQUERDA                    -->
+<!-- ================================================= -->
+
+<model name="caixa_esquerda">
+
+    <static>true</static>
+
+    <pose>0.8 1.2 0.30 0 0 0</pose>
+
+    <link name="link">
+
+        <collision name="collision">
+            <geometry>
+                <box>
+                    <size>0.60 0.60 0.60</size>
+                </box>
+            </geometry>
+        </collision>
+
+        <visual name="visual">
+            <geometry>
+                <box>
+                    <size>0.60 0.60 0.60</size>
+                </box>
+            </geometry>
+
+            <material>
+                <ambient>0.1 0.2 0.9 1</ambient>
+                <diffuse>0.1 0.2 0.9 1</diffuse>
+            </material>
+        </visual>
+
+    </link>
+
+</model>
+
+
+<!-- ================================================= -->
+<!-- OBSTÁCULO 3 - CAIXA À DIREITA                     -->
+<!-- ================================================= -->
+
+<model name="caixa_direita">
+
+    <static>true</static>
+
+    <pose>0.8 -1.2 0.25 0 0 0</pose>
+
+    <link name="link">
+
+        <collision name="collision">
+            <geometry>
+                <box>
+                    <size>0.50 0.50 0.50</size>
+                </box>
+            </geometry>
+        </collision>
+
+        <visual name="visual">
+            <geometry>
+                <box>
+                    <size>0.50 0.50 0.50</size>
+                </box>
+            </geometry>
+
+            <material>
+                <ambient>0.1 0.8 0.2 1</ambient>
+                <diffuse>0.1 0.8 0.2 1</diffuse>
+            </material>
+        </visual>
+
+    </link>
+
+</model>
+
+
+<!-- ================================================= -->
+<!-- OBSTÁCULO 4 - CILINDRO                            -->
+<!-- ================================================= -->
+
+<model name="cilindro">
+
+    <static>true</static>
+
+    <pose>-1.2 0.8 0.40 0 0 0</pose>
+
+    <link name="link">
+
+        <collision name="collision">
+            <geometry>
+                <cylinder>
+                    <radius>0.30</radius>
+                    <length>0.80</length>
+                </cylinder>
+            </geometry>
+        </collision>
+
+        <visual name="visual">
+            <geometry>
+                <cylinder>
+                    <radius>0.30</radius>
+                    <length>0.80</length>
+                </cylinder>
+            </geometry>
+
+            <material>
+                <ambient>0.9 0.6 0.1 1</ambient>
+                <diffuse>0.9 0.6 0.1 1</diffuse>
+            </material>
+        </visual>
+
+    </link>
+
+</model>
+
+
+<!-- ================================================= -->
+<!-- OBSTÁCULO 5 - PAREDE DIAGONAL                     -->
+<!-- ================================================= -->
+
+<model name="parede_diagonal">
+
+    <static>true</static>
+
+    <!-- yaw = aproximadamente 45 graus -->
+    <pose>-1.3 -1.2 0.35 0 0 0.7854</pose>
+
+    <link name="link">
+
+        <collision name="collision">
+            <geometry>
+                <box>
+                    <size>1.50 0.15 0.70</size>
+                </box>
+            </geometry>
+        </collision>
+
+        <visual name="visual">
+            <geometry>
+                <box>
+                    <size>1.50 0.15 0.70</size>
+                </box>
+            </geometry>
+
+            <material>
+                <ambient>0.7 0.1 0.8 1</ambient>
+                <diffuse>0.7 0.1 0.8 1</diffuse>
+            </material>
+        </visual>
+
+    </link>
+
+</model>
+
+
+    </world>
+
+</sdf>

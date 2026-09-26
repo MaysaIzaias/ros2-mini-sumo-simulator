@@ -1,0 +1,411 @@
+<?xml version="1.0" ?>
+
+<sdf version="1.10">
+
+    <world name="pista">
+
+        <!-- ================================================= -->
+        <!-- PLUGINS DO GAZEBO                                -->
+        <!-- ================================================= -->
+
+        <plugin
+            filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics">
+        </plugin>
+
+        <plugin
+            filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands">
+        </plugin>
+
+        <plugin
+            filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster">
+        </plugin>
+
+        <!-- Manter apenas UM plugin de sensores -->
+        <plugin
+            filename="gz-sim-sensors-system"
+            name="gz::sim::systems::Sensors">
+
+            <render_engine>ogre2</render_engine>
+
+        </plugin>
+
+
+        <!-- ================================================= -->
+        <!-- FÍSICA                                           -->
+        <!-- ================================================= -->
+
+        <physics name="physics" type="ignored">
+
+            <max_step_size>0.001</max_step_size>
+
+            <real_time_factor>1.0</real_time_factor>
+
+        </physics>
+
+        <gravity>0 0 -9.81</gravity>
+
+
+        <!-- ================================================= -->
+        <!-- ILUMINAÇÃO                                       -->
+        <!-- ================================================= -->
+
+        <light type="directional" name="sun">
+
+            <cast_shadows>true</cast_shadows>
+
+            <pose>
+                0 0 10 0 0 0
+            </pose>
+
+            <diffuse>
+                0.9 0.9 0.9 1
+            </diffuse>
+
+            <specular>
+                0.2 0.2 0.2 1
+            </specular>
+
+            <direction>
+                -0.5 0.1 -0.9
+            </direction>
+
+        </light>
+
+
+        <!-- ================================================= -->
+        <!-- ÁREA EXTERNA / YOCHI                             -->
+        <!-- ================================================= -->
+        <!--
+            Mini Sumô:
+            Yochi = 1.80 m x 1.80 m
+
+            A superfície superior fica em z = 0.
+        -->
+
+        <model name="yochi">
+
+            <static>true</static>
+
+            <pose>
+                0 0 -0.005 0 0 0
+            </pose>
+
+            <link name="yochi_link">
+
+                <collision name="yochi_collision">
+
+                    <geometry>
+
+                        <box>
+                            <size>
+                                1.80 1.80 0.01
+                            </size>
+                        </box>
+
+                    </geometry>
+
+                </collision>
+
+
+                <visual name="yochi_visual">
+
+                    <geometry>
+
+                        <box>
+                            <size>
+                                1.80 1.80 0.01
+                            </size>
+                        </box>
+
+                    </geometry>
+
+
+                    <material>
+
+                        <ambient>
+                            0.20 0.20 0.20 1
+                        </ambient>
+
+                        <diffuse>
+                            0.20 0.20 0.20 1
+                        </diffuse>
+
+                        <specular>
+                            0.05 0.05 0.05 1
+                        </specular>
+
+                    </material>
+
+                </visual>
+
+            </link>
+
+        </model>
+
+
+        <!-- ================================================= -->
+        <!-- DOHYO MINI SUMÔ 500 g                            -->
+        <!-- ================================================= -->
+        <!--
+            Diâmetro total = 770 mm
+            Raio total     = 385 mm
+
+            Altura         = 25 mm
+
+            Tawara         = 25 mm
+
+            Raio preto:
+            385 - 25 = 360 mm
+        -->
+
+        <model name="dohyo">
+
+            <static>true</static>
+
+            <pose>
+                0 0 0 0 0 0
+            </pose>
+
+            <link name="dohyo_link">
+
+
+                <!-- ========================================= -->
+                <!-- COLISÃO REAL DO DOHYO                    -->
+                <!-- ========================================= -->
+
+                <collision name="dohyo_collision">
+
+                    <pose>
+                        0 0 0.0125 0 0 0
+                    </pose>
+
+                    <geometry>
+
+                        <cylinder>
+
+                            <radius>
+                                0.385
+                            </radius>
+
+                            <length>
+                                0.025
+                            </length>
+
+                        </cylinder>
+
+                    </geometry>
+
+
+                    <surface>
+
+                        <friction>
+
+                            <ode>
+
+                                <mu>1.0</mu>
+
+                                <mu2>1.0</mu2>
+
+                            </ode>
+
+                        </friction>
+
+                    </surface>
+
+                </collision>
+
+
+                <!-- ========================================= -->
+                <!-- DISCO BRANCO                             -->
+                <!-- ========================================= -->
+                <!--
+                    O disco branco inteiro serve de base
+                    visual para formar a Tawara.
+                -->
+
+                <visual name="disco_branco">
+
+                    <pose>
+                        0 0 0.0125 0 0 0
+                    </pose>
+
+                    <geometry>
+
+                        <cylinder>
+
+                            <radius>
+                                0.385
+                            </radius>
+
+                            <length>
+                                0.025
+                            </length>
+
+                        </cylinder>
+
+                    </geometry>
+
+                    <material>
+
+                        <ambient>
+                            1 1 1 1
+                        </ambient>
+
+                        <diffuse>
+                            1 1 1 1
+                        </diffuse>
+
+                        <specular>
+                            0.15 0.15 0.15 1
+                        </specular>
+
+                    </material>
+
+                </visual>
+
+
+                <!-- ========================================= -->
+                <!-- SUPERFÍCIE PRETA                         -->
+                <!-- ========================================= -->
+                <!--
+                    Raio externo: 385 mm
+                    Tawara:       25 mm
+
+                    Raio preto:
+                    385 - 25 = 360 mm
+                -->
+
+                <visual name="superficie_preta">
+
+                    <pose>
+                        0 0 0.0251 0 0 0
+                    </pose>
+
+                    <geometry>
+
+                        <cylinder>
+
+                            <radius>
+                                0.360
+                            </radius>
+
+                            <length>
+                                0.0002
+                            </length>
+
+                        </cylinder>
+
+                    </geometry>
+
+                    <material>
+
+                        <ambient>
+                            0.01 0.01 0.01 1
+                        </ambient>
+
+                        <diffuse>
+                            0.01 0.01 0.01 1
+                        </diffuse>
+
+                        <specular>
+                            0.05 0.05 0.05 1
+                        </specular>
+
+                    </material>
+
+                </visual>
+
+
+                <!-- ========================================= -->
+                <!-- SHIKIRI-SEN DO CARRO 1                   -->
+                <!-- ========================================= -->
+                <!--
+                    100 mm comprimento
+                    10 mm largura
+
+                    Estamos usando o eixo Y para os robôs
+                    ficarem frente a frente.
+                -->
+
+                <visual name="shikiri_carro1">
+
+                    <pose>
+                        0 0.05 0.0254 0 0 0
+                    </pose>
+
+                    <geometry>
+
+                        <box>
+
+                            <size>
+                                0.10 0.01 0.0004
+                            </size>
+
+                        </box>
+
+                    </geometry>
+
+                    <material>
+
+                        <!-- Marrom -->
+                        <ambient>
+                            0.35 0.12 0.03 1
+                        </ambient>
+
+                        <diffuse>
+                            0.35 0.12 0.03 1
+                        </diffuse>
+
+                    </material>
+
+                </visual>
+
+
+                <!-- ========================================= -->
+                <!-- SHIKIRI-SEN DO CARRO 2                   -->
+                <!-- ========================================= -->
+
+                <visual name="shikiri_carro2">
+
+                    <pose>
+                        0 -0.05 0.0254 0 0 0
+                    </pose>
+
+                    <geometry>
+
+                        <box>
+
+                            <size>
+                                0.10 0.01 0.0004
+                            </size>
+
+                        </box>
+
+                    </geometry>
+
+                    <material>
+
+                        <ambient>
+                            0.35 0.12 0.03 1
+                        </ambient>
+
+                        <diffuse>
+                            0.35 0.12 0.03 1
+                        </diffuse>
+
+                    </material>
+
+                </visual>
+
+
+            </link>
+
+        </model>
+
+
+    </world>
+
+</sdf>

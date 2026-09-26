@@ -1,0 +1,40 @@
+- ros_topic_name: "/tof/front/scan"
+  gz_topic_name: "/tof/front/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
+
+
+- ros_topic_name: "/sharp/front_left/scan"
+  gz_topic_name: "/sharp/front_left/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
+
+
+- ros_topic_name: "/sharp/front_right/scan"
+  gz_topic_name: "/sharp/front_right/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
+
+
+- ros_topic_name: "/sharp/left/scan"
+  gz_topic_name: "/sharp/left/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
+
+
+- ros_topic_name: "/sharp/right/scan"
+  gz_topic_name: "/sharp/right/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
+
+
+- ros_topic_name: "/sharp/rear/scan"
+  gz_topic_name: "/sharp/rear/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS

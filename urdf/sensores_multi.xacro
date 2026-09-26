@@ -1,0 +1,190 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- ========================================================= -->
+    <!-- MACRO GENÉRICO PARA SENSOR DE DISTÂNCIA                  -->
+    <!-- ========================================================= -->
+    <!--
+        Este macro serve tanto para o ToF quanto para os sensores
+        Sharp.
+
+        O sensor é representado no Gazebo por um gpu_lidar estreito.
+
+        Parâmetros:
+
+        name        -> nome interno do sensor
+        topic       -> tópico SEM "/" no começo
+        x y z       -> posição em relação ao base_link
+        yaw         -> orientação horizontal em radianos
+        fov         -> campo de visão em radianos
+        samples     -> quantidade de raios
+        min_range   -> alcance mínimo em metros
+        max_range   -> alcance máximo em metros
+        update_rate -> frequência de atualização em Hz
+    -->
+
+    <xacro:macro
+        name="range_sensor"
+        params="
+            name
+            topic
+            x
+            y
+            z
+            yaw
+            fov
+            samples
+            min_range
+            max_range
+            update_rate
+        ">
+
+        <!-- ===================================================== -->
+        <!-- LINK DO SENSOR                                       -->
+        <!-- ===================================================== -->
+
+        <link name="${name}_link">
+
+            <!-- Pequena caixa apenas para visualizar o sensor -->
+            <visual>
+
+                <geometry>
+                    <box size="0.012 0.016 0.008"/>
+                </geometry>
+
+                <material name="${name}_material">
+                    <color rgba="0.1 0.1 0.1 1.0"/>
+                </material>
+
+            </visual>
+
+        </link>
+
+
+        <!-- ===================================================== -->
+        <!-- JUNTA FIXA                                           -->
+        <!-- ===================================================== -->
+        <!--
+            O sensor fica preso ao base_link.
+        -->
+
+        <joint name="${name}_joint" type="fixed">
+
+            <parent link="base_link"/>
+
+            <child link="${name}_link"/>
+
+            <origin
+                xyz="${x} ${y} ${z}"
+                rpy="0 0 ${yaw}"/>
+
+        </joint>
+
+
+        <!-- ===================================================== -->
+        <!-- SENSOR NO GAZEBO                                     -->
+        <!-- ===================================================== -->
+
+        <gazebo reference="${name}_link">
+
+            <sensor
+                name="${name}_sensor"
+                type="gpu_lidar">
+
+                <!--
+                    robot_ns vem do carro_multi.xacro.
+
+                    Exemplos gerados:
+
+                    /carro1/tof/front/scan
+                    /carro2/tof/front/scan
+                -->
+                <topic>/${robot_ns}/${topic}</topic>
+
+
+                <!--
+                    Frame usado pela mensagem do sensor.
+
+                    Exemplos:
+
+                    carro1/tof_front_link
+                    carro2/tof_front_link
+                -->
+                <gz_frame_id>${robot_ns}/${name}_link</gz_frame_id>
+
+
+                <!-- Frequência do sensor -->
+                <update_rate>${update_rate}</update_rate>
+
+                <!-- Sensor sempre ligado -->
+                <always_on>true</always_on>
+
+                <!--
+                    true durante nossos testes para ajudar
+                    a enxergar a direção do sensor no Gazebo.
+                -->
+                <visualize>true</visualize>
+
+
+                <!-- ================================================= -->
+                <!-- CONFIGURAÇÃO DO LIDAR                            -->
+                <!-- ================================================= -->
+
+                <lidar>
+
+                    <scan>
+
+                        <!-- ========================================= -->
+                        <!-- VARREDURA HORIZONTAL                     -->
+                        <!-- ========================================= -->
+
+                        <horizontal>
+
+                            <!-- Quantidade de raios -->
+                            <samples>${samples}</samples>
+
+                            <resolution>1</resolution>
+
+                            <!--
+                                Campo de visão centralizado em 0.
+
+                                Se:
+                                fov = 0
+                                samples = 1
+
+                                teremos praticamente um único raio
+                                apontando para frente.
+                            -->
+                            <min_angle>${-fov/2.0}</min_angle>
+
+                            <max_angle>${fov/2.0}</max_angle>
+
+                        </horizontal>
+
+                    </scan>
+
+
+                    <!-- ============================================= -->
+                    <!-- ALCANCE                                     -->
+                    <!-- ============================================= -->
+
+                    <range>
+
+                        <min>${min_range}</min>
+
+                        <max>${max_range}</max>
+
+                        <resolution>0.005</resolution>
+
+                    </range>
+
+                </lidar>
+
+            </sensor>
+
+        </gazebo>
+
+    </xacro:macro>
+
+</robot>

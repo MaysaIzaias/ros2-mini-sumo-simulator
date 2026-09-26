@@ -1,0 +1,481 @@
+<?xml version="1.0"?>
+
+<robot name="carro" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- ================================================ -->
+    <!-- PARÂMETROS GERAIS DO CARRO                       -->
+    <!-- ================================================ -->
+
+    <!-- Chassi -->
+    <xacro:property name="chassis_length" value="0.100"/>
+    <xacro:property name="chassis_width"  value="0.100"/>
+    <xacro:property name="chassis_height" value="0.084"/>
+    <xacro:property name="chassis_mass"   value="2.0"/>
+
+    <!-- Rodas -->
+    <xacro:property name="wheel_radius" value="0.016"/>
+    <xacro:property name="wheel_width"  value="0.021"/>
+    <xacro:property name="wheel_mass"   value="0.05"/>
+
+    <!-- Geometria do veículo -->
+    <xacro:property name="wheel_base" value="0.070"/>
+    <xacro:property name="track_width" value="0.121"/>
+
+    <!-- Limites mecânicos -->
+    <xacro:property name="max_wheel_speed" value="20.0"/>
+    <xacro:property name="max_wheel_effort" value="10.0"/>
+
+
+    <!-- ================================================ -->
+    <!-- CHASSI                                           -->
+    <!-- ================================================ -->
+
+    <link name="base_link">
+
+        <visual>
+            <geometry>
+                <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+            </geometry>
+
+            <material name="blue">
+                <color rgba="0.1 0.3 0.8 1.0"/>
+            </material>
+        </visual>
+
+        <collision>
+            <geometry>
+                <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+            </geometry>
+        </collision>
+
+        <inertial>
+            <mass value="${chassis_mass}"/>
+
+            <inertia
+                ixx="${chassis_mass * (chassis_width*chassis_width + chassis_height*chassis_height) / 12.0}"
+                ixy="0.0"
+                ixz="0.0"
+                iyy="${chassis_mass * (chassis_length*chassis_length + chassis_height*chassis_height) / 12.0}"
+                iyz="0.0"
+                izz="${chassis_mass * (chassis_length*chassis_length + chassis_width*chassis_width) / 12.0}"/>
+        </inertial>
+
+    </link>
+
+<!-- ================================================= -->
+<!-- APOIO DIANTEIRO / SKID                            -->
+<!-- ================================================= -->
+
+<link name="front_skid_link">
+
+    <visual>
+        <geometry>
+            <sphere radius="0.004"/>
+        </geometry>
+
+        <material name="skid_gray">
+            <color rgba="0.3 0.3 0.3 1.0"/>
+        </material>
+    </visual>
+
+
+    <collision>
+        <geometry>
+            <sphere radius="0.004"/>
+        </geometry>
+    </collision>
+
+
+    <inertial>
+        <mass value="0.001"/>
+
+        <inertia
+            ixx="0.0000000064"
+            ixy="0"
+            ixz="0"
+            iyy="0.0000000064"
+            iyz="0"
+            izz="0.0000000064"/>
+    </inertial>
+
+</link>
+
+
+<joint name="front_skid_joint" type="fixed">
+
+    <parent link="base_link"/>
+
+    <child link="front_skid_link"/>
+
+    <origin
+        xyz="0.043 0 -0.040"
+        rpy="0 0 0"/>
+
+</joint>
+
+
+<!-- Baixo atrito para permitir o giro diferencial -->
+<gazebo reference="front_skid_link">
+
+    <mu1>0.02</mu1>
+    <mu2>0.02</mu2>
+
+</gazebo>
+
+<gazebo reference="base_link">
+    <mu1>0.05</mu1>
+    <mu2>0.05</mu2>
+</gazebo>
+
+
+    <!-- ================================================ -->
+    <!-- MACRO PARA CRIAR UMA RODA                        -->
+    <!-- ================================================ -->
+    <xacro:property name="wheel_center_from_bottom" value="0.012"/>
+    <xacro:macro name="wheel" params="name x y">
+
+        <link name="${name}_link">
+
+            <visual>
+                <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+
+                <geometry>
+                    <cylinder
+                        radius="${wheel_radius}"
+                        length="${wheel_width}"/>
+                </geometry>
+
+                <material name="black">
+                    <color rgba="0.05 0.05 0.05 1.0"/>
+                </material>
+            </visual>
+
+            <collision>
+                <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+
+                <geometry>
+                    <cylinder
+                        radius="${wheel_radius}"
+                        length="${wheel_width}"/>
+                </geometry>
+            </collision>
+
+            <inertial>
+                <mass value="${wheel_mass}"/>
+
+                <inertia
+                    ixx="${wheel_mass * (3*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}"
+                    ixy="0"
+                    ixz="0"
+                    iyy="${wheel_mass * wheel_radius*wheel_radius/2.0}"
+                    iyz="0"
+                    izz="${wheel_mass * (3*wheel_radius*wheel_radius + wheel_width*wheel_width)/12.0}"/>
+            </inertial>
+
+        </link>
+
+
+        <joint name="${name}_joint" type="continuous">
+
+            <parent link="base_link"/>
+            <child link="${name}_link"/>
+
+            <origin
+                xyz="${x} ${y} ${-chassis_height/2.0 + wheel_center_from_bottom}"
+                rpy="0 0 0"/>
+
+            <axis xyz="0 1 0"/>
+
+            <limit
+                effort="${max_wheel_effort}"
+                velocity="${max_wheel_speed}"/>
+
+            <dynamics
+                damping="0.02"
+                friction="0.0"/>
+
+        </joint>
+
+    </xacro:macro>
+
+
+    <!-- ================================================ -->
+    <!-- DUAS  RODAS                                     -->
+    <!-- ================================================ -->
+
+    <xacro:wheel
+        name="left_wheel"
+        x="-0.031"
+        y="${track_width/2.0}"/>
+
+    <xacro:wheel
+        name="right_wheel"
+        x="-0.031"
+        y="${-track_width/2.0}"/>
+<!-- ================================================ -->
+<!-- POSIÇÃO DOS SENSORES                             -->
+<!-- ================================================ -->
+
+<!-- Sensor a 50 mm da base inferior do chassi -->
+<xacro:property
+    name="sensor_z"
+    value="${0.050 - chassis_height/2.0}"/>
+
+<!-- 2 mm para fora da superfície do chassi -->
+<xacro:property
+    name="sensor_front_x"
+    value="${chassis_length/2.0 + 0.002}"/>
+
+<xacro:property
+    name="sensor_side_y"
+    value="${chassis_width/2.0 + 0.002}"/>
+
+<!-- ================================================ -->
+<!-- SENSORES                                         -->
+<!-- ================================================ -->
+
+<xacro:include filename="sensores.xacro"/>
+<!-- ================================================ -->
+<!-- TOF FRONTAL - 0 GRAUS                            -->
+<!-- ================================================ -->
+
+<xacro:range_sensor
+
+    name="tof_front"
+
+    topic="/tof/front/scan"
+
+    x="${sensor_front_x}"
+
+    y="0.0"
+
+    z="${sensor_z}"
+
+    yaw="0.0"
+
+    fov="0.10"
+
+    samples="5"
+
+    min_range="0.04"
+
+    max_range="2.0"
+
+    update_rate="20"
+
+/>
+
+<!-- ================================================ -->
+<!-- SHARP FRONTAL ESQUERDO +30 GRAUS                 -->
+<!-- ================================================ -->
+
+<xacro:range_sensor
+
+    name="sharp_front_left"
+
+    topic="/sharp/front_left/scan"
+
+    x="${sensor_front_x}"
+
+    y="0.025"
+
+    z="${sensor_z}"
+
+    yaw="0.523599"
+
+    fov="0.12"
+
+    samples="5"
+
+    min_range="0.04"
+
+    max_range="0.30"
+
+    update_rate="20"
+
+/>
+
+<!-- ================================================ -->
+<!-- SHARP FRONTAL DIREITO -30 GRAUS                  -->
+<!-- ================================================ -->
+
+<xacro:range_sensor
+
+    name="sharp_front_right"
+
+    topic="/sharp/front_right/scan"
+
+    x="${sensor_front_x}"
+
+    y="-0.025"
+
+    z="${sensor_z}"
+
+    yaw="-0.523599"
+
+    fov="0.12"
+
+    samples="5"
+
+    min_range="0.04"
+
+    max_range="0.30"
+
+    update_rate="20"
+
+/>
+
+
+<!-- ================================================ -->
+<!-- SHARP LATERAL ESQUERDO +90 GRAUS                 -->
+<!-- ================================================ -->
+
+<xacro:range_sensor
+
+    name="sharp_left"
+
+    topic="/sharp/left/scan"
+
+    x="0.0"
+
+    y="${sensor_side_y}"
+
+    z="${sensor_z}"
+
+    yaw="1.570796"
+
+    fov="0.12"
+
+    samples="5"
+
+    min_range="0.04"
+
+    max_range="0.30"
+
+    update_rate="20"
+
+/>
+
+
+<!-- ================================================ -->
+<!-- SHARP LATERAL DIREITO -90 GRAUS                  -->
+<!-- ================================================ -->
+
+<xacro:range_sensor
+
+    name="sharp_right"
+
+    topic="/sharp/right/scan"
+
+    x="0.0"
+
+    y="${-sensor_side_y}"
+
+    z="${sensor_z}"
+
+    yaw="-1.570796"
+
+    fov="0.12"
+
+    samples="5"
+
+    min_range="0.04"
+
+    max_range="0.30"
+
+    update_rate="20"
+
+/>
+
+
+<!-- ================================================ -->
+<!-- SHARP TRASEIRO 180 GRAUS                         -->
+<!-- ================================================ -->
+
+<xacro:range_sensor
+
+    name="sharp_rear"
+
+    topic="/sharp/rear/scan"
+
+    x="${-sensor_front_x}"
+
+    y="0.0"
+
+    z="${sensor_z}"
+
+    yaw="3.141593"
+
+    fov="0.12"
+
+    samples="5"
+
+    min_range="0.04"
+
+    max_range="0.30"
+
+    update_rate="20"
+
+/>
+
+
+
+    <!-- ================================================ -->
+    <!-- ROS 2 CONTROL                                    -->
+    <!-- ================================================ -->
+
+    <ros2_control name="GazeboSimSystem" type="system">
+
+        <hardware>
+            <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+        </hardware>
+
+<joint name="left_wheel_joint">
+
+    <command_interface name="velocity">
+        <param name="min">-${max_wheel_speed}</param>
+        <param name="max">${max_wheel_speed}</param>
+    </command_interface>
+
+    <state_interface name="position"/>
+    <state_interface name="velocity"/>
+
+</joint>
+
+
+<joint name="right_wheel_joint">
+
+    <command_interface name="velocity">
+        <param name="min">-${max_wheel_speed}</param>
+        <param name="max">${max_wheel_speed}</param>
+    </command_interface>
+
+    <state_interface name="position"/>
+    <state_interface name="velocity"/>
+
+</joint>
+        
+
+    </ros2_control>
+
+
+    <!-- ================================================ -->
+    <!-- GAZEBO + ROS2 CONTROL                            -->
+    <!-- ================================================ -->
+
+    <gazebo>
+
+        <plugin
+            filename="libgz_ros2_control-system.so"
+            name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+
+            <parameters>
+                $(find carro_sim)/config/controllers.yaml
+            </parameters>
+
+        </plugin>
+
+    </gazebo>
+          
+
+</robot>

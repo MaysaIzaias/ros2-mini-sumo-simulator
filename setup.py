@@ -1,0 +1,105 @@
+from setuptools import find_packages, setup
+
+from glob import glob
+
+from sensor_msgs.msg import LaserScan
+import os
+
+
+package_name = 'carro_sim'
+
+
+setup(
+
+    name=package_name,
+
+    version='0.0.1',
+
+    packages=find_packages(
+        exclude=['test']
+    ),
+
+    data_files=[
+
+        (
+            'share/ament_index/resource_index/packages',
+            ['resource/' + package_name]
+        ),
+
+        (
+            'share/' + package_name,
+            ['package.xml']
+        ),
+
+        (
+            os.path.join(
+                'share',
+                package_name,
+                'launch'
+            ),
+
+            glob('launch/*.py')
+        ),
+
+        (
+            os.path.join(
+                'share',
+                package_name,
+                'urdf'
+            ),
+
+            glob('urdf/*')
+        ),
+
+        (
+            os.path.join(
+                'share',
+                package_name,
+                'config'
+            ),
+
+            glob('config/*.yaml')
+        ),
+
+        (
+            os.path.join(
+                'share',
+                package_name,
+                'worlds'
+            ),
+
+            glob('worlds/*.sdf')
+        ),
+
+    ],
+
+    install_requires=['setuptools'],
+
+    zip_safe=True,
+
+    maintainer='fablab',
+
+    maintainer_email='fablab@example.com',
+
+    description='Simulacao de carro utilizando ROS 2 Jazzy e Gazebo Harmonic',
+
+    license='Apache-2.0',
+
+    tests_require=['pytest'],
+
+    entry_points={
+
+        'console_scripts': [
+            'quadrado = carro_sim.percurso_quadrado:main',
+            'percurso = carro_sim.percurso:main',
+            'teste_odom = carro_sim.teste_odom:main',
+	    'motor_n20  = carro_sim.motor_n20:main',
+            'controle_luta = carro_sim.controle_luta:main',
+ # Controle simples do robô de sumô.
+        'ataque_tof = carro_sim.ataque_tof:main',
+
+        ],
+
+        },
+
+)
